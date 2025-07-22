@@ -10,6 +10,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Ping the Render App
-        run: curl -s https://finura.onrender.com/health
+        run: curl -s https://beautislot-sjf9.onrender.com/health
 
         
