@@ -10,6 +10,7 @@ import { Users, Calendar, DollarSign, TrendingUp, Shield, Settings } from "lucid
 import { useAuth } from "@/contexts/auth-context"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import LogoutButton from "@/components/logout-button";
 
 interface User {
   id: string
@@ -120,6 +121,7 @@ export default function AdminDashboard() {
                 <p className="text-sm font-medium text-[#22223B]">{user?.name}</p>
                 <p className="text-xs text-gray-500">Administrator</p>
               </div>
+              <LogoutButton />
             </div>
           </div>
         </div>

@@ -10,6 +10,7 @@ import { Calendar, Users, DollarSign, Clock, Plus, Settings, ImageIcon, Briefcas
 import { useAuth } from "@/contexts/auth-context"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import LogoutButton from "@/components/logout-button";
 
 interface Service {
   id: string
@@ -155,6 +156,7 @@ export default function ProviderDashboard() {
                 <p className="text-sm font-medium text-[#22223B]">{user?.name}</p>
                 <p className="text-xs text-gray-500">Provider</p>
               </div>
+              <LogoutButton />
             </div>
           </div>
         </div>

@@ -10,6 +10,7 @@ import { Calendar, Search, MapPin, Star, Clock, Sparkles, Plus } from "lucide-re
 import { useAuth } from "@/contexts/auth-context"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import LogoutButton from "@/components/logout-button";
 
 interface Provider {
   id: string
@@ -131,6 +132,7 @@ export default function ClientDashboard() {
                 <p className="text-sm font-medium text-[#22223B]">{user?.name}</p>
                 <p className="text-xs text-gray-500">Client</p>
               </div>
+              <LogoutButton />
             </div>
           </div>
         </div>
