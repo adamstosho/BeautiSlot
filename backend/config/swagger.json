@@ -1,0 +1,890 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "BeautiSlot API",
+    "version": "v1",
+    "description": "API documentation for the BeautiSlot Beauty & Personal Care Booking Platform.",
+    "contact": {
+      "name": "BeautiSlot Team",
+      "email": "info@beautislot.com"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "servers": [
+    { "url": "http://localhost:5000/api" }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "email": { "type": "string" },
+          "role": { "type": "string", "enum": ["provider", "client"] },
+          "phone": { "type": "string" },
+          "avatarUrl": { "type": "string" },
+          "bio": { "type": "string" },
+          "location": { "type": "string" },
+          "categories": { "type": "array", "items": { "type": "string" } },
+          "experienceYears": { "type": "integer" },
+          "socialLinks": {
+            "type": "object",
+            "properties": {
+              "instagram": { "type": "string" },
+              "whatsapp": { "type": "string" },
+              "facebook": { "type": "string" }
+            }
+          },
+          "ratingsAverage": { "type": "number" },
+          "ratingsCount": { "type": "integer" },
+          "portfolio": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/PortfolioItem" }
+          }
+        }
+      },
+      "PortfolioItem": {
+        "type": "object",
+        "properties": {
+          "_id": { "type": "string" },
+          "imageUrl": { "type": "string" },
+          "caption": { "type": "string" },
+          "uploadedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "Service": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "providerId": { "type": "string" },
+          "name": { "type": "string" },
+          "description": { "type": "string" },
+          "category": { "type": "string" },
+          "price": { "type": "number" },
+          "durationMins": { "type": "integer" }
+        }
+      },
+      "Availability": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "providerId": { "type": "string" },
+          "dayOfWeek": { "type": "string" },
+          "slots": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "startTime": { "type": "string" },
+                "endTime": { "type": "string" }
+              }
+            }
+          }
+        }
+      },
+      "Appointment": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "clientId": { "type": "string" },
+          "providerId": { "type": "string" },
+          "serviceId": { "type": "string" },
+          "date": { "type": "string" },
+          "startTime": { "type": "string" },
+          "endTime": { "type": "string" },
+          "status": { "type": "string", "enum": ["pending", "confirmed", "cancelled", "completed"] },
+          "paymentStatus": { "type": "string", "enum": ["unpaid", "paid"] }
+        }
+      },
+      "Review": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "appointmentId": { "type": "string" },
+          "clientId": { "type": "string" },
+          "providerId": { "type": "string" },
+          "rating": { "type": "integer", "minimum": 1, "maximum": 5 },
+          "review": { "type": "string" },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      }
+    }
+  },
+  "security": [
+    { "bearerAuth": [] }
+  ],
+  "paths": {
+    "/auth/register": {
+      "post": {
+        "summary": "Register a new user (provider or client)",
+        "tags": ["Auth"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "email": { "type": "string" },
+                  "password": { "type": "string" },
+                  "role": { "type": "string", "enum": ["provider", "client"] }
+                },
+                "required": ["name", "email", "password", "role"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User registered successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "token": { "type": "string" },
+                    "user": { "$ref": "#/components/schemas/User" }
+                  }
+                }
+              }
+            }
+          },
+          "409": { "description": "Email already registered" },
+          "400": { "description": "Validation error" }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "summary": "Login a user",
+        "tags": ["Auth"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string" },
+                  "password": { "type": "string" }
+                },
+                "required": ["email", "password"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "token": { "type": "string" },
+                    "user": { "$ref": "#/components/schemas/User" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Invalid credentials" },
+          "400": { "description": "Validation error" }
+        }
+      }
+    },
+    "/auth/forgot-password": {
+      "post": {
+        "summary": "Request password reset email",
+        "tags": ["Auth"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string" }
+                },
+                "required": ["email"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Password reset email sent" },
+          "404": { "description": "User not found" },
+          "400": { "description": "Validation error" }
+        }
+      }
+    },
+    "/auth/reset-password": {
+      "post": {
+        "summary": "Reset password with token",
+        "tags": ["Auth"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "token": { "type": "string" },
+                  "password": { "type": "string" }
+                },
+                "required": ["token", "password"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Password reset successful" },
+          "400": { "description": "Invalid or expired token" }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "summary": "Logout the current user",
+        "tags": ["Auth"],
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Logout successful. Client should clear the token." },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/providers/profile": {
+      "get": {
+        "summary": "Get provider profile (provider only)",
+        "tags": ["Provider"],
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Provider profile returned", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/User" } } } },
+          "401": { "description": "Unauthorized" }
+        }
+      },
+      "put": {
+        "summary": "Update provider profile (provider only)",
+        "tags": ["Provider"],
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "email": { "type": "string" },
+                  "phone": { "type": "string" },
+                  "avatarUrl": { "type": "string" },
+                  "bio": { "type": "string" },
+                  "location": { "type": "string" },
+                  "categories": { "type": "array", "items": { "type": "string" } },
+                  "experienceYears": { "type": "integer" },
+                  "socialLinks": {
+                    "type": "object",
+                    "properties": {
+                      "instagram": { "type": "string" },
+                      "whatsapp": { "type": "string" },
+                      "facebook": { "type": "string" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Provider profile updated" },
+          "401": { "description": "Unauthorized" }
+        }
+      },
+      "delete": {
+        "summary": "Delete provider profile (provider only)",
+        "tags": ["Provider"],
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Provider profile deleted" },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/providers/services": {
+      "get": {
+        "summary": "List provider services (provider only)",
+        "tags": ["Provider"],
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "List of services",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Service" }
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" }
+        }
+      },
+      "post": {
+        "summary": "Create a new service (provider only)",
+        "tags": ["Provider"],
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "description": { "type": "string" },
+                  "category": { "type": "string" },
+                  "price": { "type": "number" },
+                  "durationMins": { "type": "integer" }
+                },
+                "required": ["name", "price", "durationMins"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Service created" },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/providers/services/{id}": {
+      "put": {
+        "summary": "Update a service (provider only)",
+        "tags": ["Provider"],
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "description": { "type": "string" },
+                  "category": { "type": "string" },
+                  "price": { "type": "number" },
+                  "durationMins": { "type": "integer" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Service updated" },
+          "404": { "description": "Service not found" },
+          "401": { "description": "Unauthorized" }
+        }
+      },
+      "delete": {
+        "summary": "Delete a service (provider only)",
+        "tags": ["Provider"],
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Service deleted" },
+          "404": { "description": "Service not found" },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/providers/availability": {
+      "get": {
+        "summary": "Get provider availability (provider only)",
+        "tags": ["Provider"],
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "List of availabilities" },
+          "401": { "description": "Unauthorized" }
+        }
+      },
+      "post": {
+        "summary": "Set provider availability (provider only)",
+        "tags": ["Provider"],
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "dayOfWeek": { "type": "string" },
+                  "slots": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "startTime": { "type": "string" },
+                        "endTime": { "type": "string" }
+                      }
+                    }
+                  }
+                },
+                "required": ["dayOfWeek", "slots"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Availability set" },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/providers/availability/{id}": {
+      "put": {
+        "summary": "Update provider availability (provider only)",
+        "tags": ["Provider"],
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "dayOfWeek": { "type": "string" },
+                  "slots": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "startTime": { "type": "string" },
+                        "endTime": { "type": "string" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Availability updated" },
+          "404": { "description": "Availability not found" },
+          "401": { "description": "Unauthorized" }
+        }
+      },
+      "delete": {
+        "summary": "Delete provider availability (provider only)",
+        "tags": ["Provider"],
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Availability deleted" },
+          "404": { "description": "Availability not found" },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/providers/portfolio": {
+      "post": {
+        "summary": "Upload portfolio image (provider only)",
+        "tags": ["Provider"],
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "image": { "type": "string", "format": "binary" },
+                  "caption": { "type": "string" }
+                },
+                "required": ["image"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Portfolio image uploaded" },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/providers/portfolio/{id}": {
+      "delete": {
+        "summary": "Remove portfolio image (provider only)",
+        "tags": ["Provider"],
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Portfolio item removed" },
+          "404": { "description": "Portfolio item not found" },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/providers": {
+      "get": {
+        "summary": "Search providers (public)",
+        "tags": ["Client"],
+        "parameters": [
+          { "name": "category", "in": "query", "schema": { "type": "string" } },
+          { "name": "location", "in": "query", "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of providers",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/User" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/providers/{id}": {
+      "get": {
+        "summary": "Get provider profile (public)",
+        "tags": ["Client"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Provider profile returned" },
+          "404": { "description": "Provider not found" }
+        }
+      }
+    },
+    "/providers/{id}/services": {
+      "get": {
+        "summary": "Get provider services (public)",
+        "tags": ["Client"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "List of services" },
+          "404": { "description": "Provider not found" }
+        }
+      }
+    },
+    "/providers/{id}/portfolio": {
+      "get": {
+        "summary": "Get provider portfolio (public)",
+        "tags": ["Client"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "List of portfolio items" },
+          "404": { "description": "Provider not found" }
+        }
+      }
+    },
+    "/providers/{id}/reviews": {
+      "get": {
+        "summary": "Get provider reviews (public)",
+        "tags": ["Client"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "List of reviews" },
+          "404": { "description": "Provider not found" }
+        }
+      }
+    },
+    "/providers/:id/availability": {
+      "get": {
+        "summary": "Get available slots for a provider on a specific date (public)",
+        "tags": ["Client"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "date", "in": "query", "required": true, "schema": { "type": "string", "format": "date" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Available slots for the provider on the given date",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "slots": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "time": { "type": "string" },
+                          "available": { "type": "boolean" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "Invalid request" }
+        }
+      }
+    },
+    "/bookings": {
+      "get": {
+        "summary": "Get client bookings (client only)",
+        "tags": ["Booking"],
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "List of bookings" },
+          "401": { "description": "Unauthorized" }
+        }
+      },
+      "post": {
+        "summary": "Book an appointment (client only). Sends email notification to provider and client.",
+        "tags": ["Booking"],
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "serviceId": { "type": "string" },
+                  "date": { "type": "string" },
+                  "startTime": { "type": "string" },
+                  "endTime": { "type": "string" }
+                },
+                "required": ["serviceId", "date", "startTime", "endTime"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Booking created" },
+          "400": { "description": "Booking failed" },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/bookings/{id}": {
+      "delete": {
+        "summary": "Cancel a booking (client only). Sends email notification to provider and client.",
+        "tags": ["Booking"],
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Booking cancelled" },
+          "400": { "description": "Cancel failed" },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/reviews": {
+      "post": {
+        "summary": "Leave a review (client only, for completed appointment)",
+        "tags": ["Review"],
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "appointmentId": { "type": "string" },
+                  "rating": { "type": "integer", "minimum": 1, "maximum": 5 },
+                  "review": { "type": "string" }
+                },
+                "required": ["appointmentId", "rating"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Review created" },
+          "400": { "description": "Review failed" },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/provider/bookings": {
+      "get": {
+        "summary": "List all bookings for the provider (provider only)",
+        "tags": ["Provider"],
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "List of bookings with detailed info",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": { "type": "string" },
+                      "clientId": { "type": "string" },
+                      "serviceId": { "type": "string" },
+                      "date": { "type": "string" },
+                      "startTime": { "type": "string" },
+                      "endTime": { "type": "string" },
+                      "status": { "type": "string" },
+                      "paymentStatus": { "type": "string" },
+                      "serviceName": { "type": "string" },
+                      "price": { "type": "number" },
+                      "clientName": { "type": "string" },
+                      "clientEmail": { "type": "string" }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/provider/bookings/{id}/status": {
+      "patch": {
+        "summary": "Update booking status (provider only)",
+        "tags": ["Provider"],
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": { "type": "string", "enum": ["confirmed", "completed", "cancelled"] }
+                },
+                "required": ["status"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Booking status updated" },
+          "400": { "description": "Update failed" },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/admin/users": {
+      "get": {
+        "summary": "List all users (admin only)",
+        "tags": ["Admin"],
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "List of users" },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/admin/users/{id}/status": {
+      "patch": {
+        "summary": "Ban or activate a user (admin only)",
+        "tags": ["Admin"],
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": { "type": "string", "enum": ["active", "banned"] }
+                },
+                "required": ["status"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "User status updated" },
+          "400": { "description": "Update failed" },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/admin/users/{id}": {
+      "delete": {
+        "summary": "Delete a user (admin only)",
+        "tags": ["Admin"],
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "User deleted" },
+          "400": { "description": "Delete failed" },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/admin/bookings": {
+      "get": {
+        "summary": "List all bookings (admin only)",
+        "tags": ["Admin"],
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "List of bookings" },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/admin/analytics": {
+      "get": {
+        "summary": "Get platform analytics (admin only)",
+        "tags": ["Admin"],
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Analytics data" },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    }
+  }
+} 
