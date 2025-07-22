@@ -17,6 +17,7 @@ import {
   Heart,
   Palette,
   Crown,
+  Menu,
 } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
@@ -37,6 +38,7 @@ const staggerContainer = {
 
 export default function LandingPage() {
   const [isVisible, setIsVisible] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   useEffect(() => {
     setIsVisible(true)
@@ -91,6 +93,7 @@ export default function LandingPage() {
               <span className="text-2xl font-bold text-[#22223B]">BeautiSlot</span>
             </motion.div>
 
+            {/* Desktop Nav */}
             <motion.div
               className="hidden md:flex items-center space-x-8"
               initial={{ opacity: 0, y: -20 }}
@@ -107,6 +110,17 @@ export default function LandingPage() {
                 About
               </Link>
             </motion.div>
+
+            {/* Mobile Hamburger */}
+            <div className="md:hidden flex items-center">
+              <button
+                aria-label="Open menu"
+                onClick={() => setMobileMenuOpen(true)}
+                className="p-2 rounded-md hover:bg-gray-100 focus:outline-none"
+              >
+                <Menu className="w-7 h-7 text-[#6C63FF]" />
+              </button>
+            </div>
 
             <motion.div
               className="flex items-center space-x-4"
@@ -127,6 +141,42 @@ export default function LandingPage() {
             </motion.div>
           </div>
         </div>
+        {/* Mobile Menu Drawer */}
+        {mobileMenuOpen && (
+          <div className="fixed inset-0 z-50 bg-black/40 flex justify-end md:hidden">
+            <div className="w-3/4 max-w-xs bg-white h-full shadow-lg p-6 flex flex-col">
+              <button
+                aria-label="Close menu"
+                onClick={() => setMobileMenuOpen(false)}
+                className="self-end mb-8 p-2 rounded-md hover:bg-gray-100"
+              >
+                <span className="text-2xl">&times;</span>
+              </button>
+              <Link href="#features" className="mb-4 text-lg text-[#22223B] hover:text-[#6C63FF]" onClick={() => setMobileMenuOpen(false)}>
+                Features
+              </Link>
+              <Link href="#services" className="mb-4 text-lg text-[#22223B] hover:text-[#6C63FF]" onClick={() => setMobileMenuOpen(false)}>
+                Services
+              </Link>
+              <Link href="#about" className="mb-4 text-lg text-[#22223B] hover:text-[#6C63FF]" onClick={() => setMobileMenuOpen(false)}>
+                About
+              </Link>
+              <div className="mt-auto flex flex-col gap-2">
+                <Link href="/auth/login" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="ghost" className="w-full text-[#22223B] hover:text-[#6C63FF]">
+                    Sign In
+                  </Button>
+                </Link>
+                <Link href="/auth/register" onClick={() => setMobileMenuOpen(false)}>
+                  <Button className="w-full bg-gradient-to-r from-[#6C63FF] to-[#FF6584] hover:from-[#5B54E6] hover:to-[#E55A7A] text-white">
+                    Get Started
+                  </Button>
+                </Link>
+              </div>
+            </div>
+            <div className="flex-1" onClick={() => setMobileMenuOpen(false)} />
+          </div>
+        )}
       </header>
 
       {/* Hero Section */}
@@ -204,13 +254,13 @@ export default function LandingPage() {
                   alt="Beauty Salon"
                   width={500}
                   height={600}
-                  className="rounded-2xl shadow-2xl"
+                  className="rounded-2xl shadow-2xl w-full max-w-xs sm:max-w-md md:max-w-lg lg:max-w-full h-auto mx-auto"
                 />
               </div>
 
-              {/* Floating Cards */}
+              {/* Floating Cards - adjust for mobile */}
               <motion.div
-                className="absolute -top-4 -left-4 bg-white p-4 rounded-xl shadow-lg"
+                className="absolute -top-4 left-0 sm:-left-4 bg-white p-4 rounded-xl shadow-lg max-w-[90vw] sm:max-w-xs"
                 animate={{ y: [0, -10, 0] }}
                 transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY }}
               >
@@ -226,7 +276,7 @@ export default function LandingPage() {
               </motion.div>
 
               <motion.div
-                className="absolute -bottom-4 -right-4 bg-white p-4 rounded-xl shadow-lg"
+                className="absolute -bottom-4 right-0 sm:-right-4 bg-white p-4 rounded-xl shadow-lg max-w-[90vw] sm:max-w-xs"
                 animate={{ y: [0, 10, 0] }}
                 transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY, delay: 1.5 }}
               >
@@ -262,7 +312,7 @@ export default function LandingPage() {
           </motion.div>
 
           <motion.div
-            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6"
+            className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6"
             variants={staggerContainer}
             initial="initial"
             whileInView="animate"
@@ -305,7 +355,7 @@ export default function LandingPage() {
           </motion.div>
 
           <motion.div
-            className="grid md:grid-cols-2 lg:grid-cols-4 gap-8"
+            className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-8"
             variants={staggerContainer}
             initial="initial"
             whileInView="animate"
@@ -444,7 +494,7 @@ export default function LandingPage() {
           </div>
 
           <div className="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2024 BeautiSlot. All rights reserved.</p>
+            <p>&copy; 2025 BeautiSlot. All rights reserved.</p>
           </div>
         </div>
       </footer>

@@ -176,6 +176,65 @@ npm run dev
 Go to [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
+# Preview of the App Interface (Screenshots)
+
+
+![screenshot](/frontend/public/screenshots/screencapture-localhost-3000-auth-register-2025-07-22-15_24_10.png)
+Registration page
+
+
+![screenshot](/frontend/public/screenshots/login%20(2).png)
+Login Page
+![screenshot](/frontend/public/screenshots/screencapture-localhost-3000-admin-analytics-2025-07-22-15_41_07.png)
+Admin analytics page showing the stats
+![screenshot](/frontend/public/screenshots/screencapture-localhost-3000-admin-dashboard-2025-07-22-15_40_23.png)
+Admin dashboard
+
+![screenshot](/frontend/public/screenshots/screencapture-localhost-3000-admin-settings-2025-07-22-15_41_32.png)
+Admin settings page
+
+
+![screenshot](/frontend/public/screenshots/screencapture-localhost-3000-client-dashboard-2025-07-22-15_38_47.png)
+
+Client dashboard
+
+![screenshot](/frontend/public/screenshots/screencapture-localhost-3000-client-book-2025-07-22-15_27_14.png)
+Client booking appointment page
+
+
+![screenshot](/frontend/public/screenshots/screencapture-localhost-3000-client-providers-687d0382a0d0e601bfd9797e-2025-07-22-15_25_59.png)
+
+Client page - service providers view
+
+![screenshot](/frontend/public/screenshots/screencapture-localhost-3000-provider-dashboard-2025-07-22-15_38_03%20(1).png)
+Service provider dashboard 
+
+![screenshot](/frontend/public/screenshots/screencapture-localhost-3000-provider-availability-2025-07-22-15_34_05.png)
+Provider time availability setup modal
+
+
+![screenshot](/frontend/public/screenshots/screencapture-localhost-3000-provider-portfolio-2025-07-22-15_35_58.png)
+Image portfolio modal for provider
+
+![screenshot](/frontend/public/screenshots/screencapture-localhost-3000-provider-portfolio-2025-07-22-15_36_07.png)
+Image portfolio page for provider of service 
+
+![screenshot](/frontend/public/screenshots/screencapture-localhost-3000-provider-profile-2025-07-22-15_37_37.png)
+Provider profile page
+
+![screenshot](/frontend/public/screenshots/screencapture-localhost-3000-provider-services-2025-07-22-15_32_56.png)
+
+Provider services page (a modal to add types and description of services)
+
+
+
+
+
+
+
+
+
+---
 
 ## License
 This project is licensed under the MIT License. See the [LICENSE](../LICENSE) file for details.
